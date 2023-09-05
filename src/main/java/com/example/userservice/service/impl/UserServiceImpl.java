@@ -41,6 +41,7 @@ public class UserServiceImpl implements UserService {
 
     private final OrderServiceClient orderServiceClient;
 
+
     @Override
     public UserDto createUser(UserDto userDto) {
         userDto.setUserId(UUID.randomUUID().toString());
