@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.modelmapper.spi.MatchingStrategy;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
@@ -41,6 +43,7 @@ public class UserServiceImpl implements UserService {
 
     private final OrderServiceClient orderServiceClient;
 
+    private final CircuitBreakerFactory circuitBreakerFactory;
 
     @Override
     public UserDto createUser(UserDto userDto) {
@@ -73,7 +76,10 @@ public class UserServiceImpl implements UserService {
 //        });
 //
 //        List<ResponseOrder> orders = orderListResponse.getBody();
-        List<ResponseOrder> orders = orderServiceClient.getOrders(userId);
+
+        //List<ResponseOrder> orders = orderServiceClient.getOrders(userId);
+        CircuitBreaker circuitbreak = circuitBreakerFactory.create("circuitbreak");
+        List<ResponseOrder> orders = circuitbreak.run(()->  orderServiceClient.getOrders(userId), throwable -> new ArrayList<>());
         userDto.setOrders(orders);
 
 
