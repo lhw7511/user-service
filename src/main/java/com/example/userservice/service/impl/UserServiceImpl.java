@@ -8,6 +8,7 @@ import com.example.userservice.service.UserService;
 import com.example.userservice.vo.ResponseOrder;
 import com.example.userservice.vo.ResponseUser;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.modelmapper.spi.MatchingStrategy;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -78,8 +80,10 @@ public class UserServiceImpl implements UserService {
 //        List<ResponseOrder> orders = orderListResponse.getBody();
 
         //List<ResponseOrder> orders = orderServiceClient.getOrders(userId);
+        log.info("Before call orders micro service");
         CircuitBreaker circuitbreak = circuitBreakerFactory.create("circuitbreak");
         List<ResponseOrder> orders = circuitbreak.run(()->  orderServiceClient.getOrders(userId), throwable -> new ArrayList<>());
+        log.info("After call orders micro service");
         userDto.setOrders(orders);
 
 
